@@ -1,25 +1,53 @@
-import React, { Component } from 'react';
-import logo from '../logo.svg';
+import React from 'react';
 import './App.css';
+import mytaxiLogo from '../images/Mytaxi_logo.png';
+import { getTaxis, MyTaxiVehicleData } from '../services/mytaxi';
+import Map from '../components/Map';
 
-class App extends Component {
+export interface AppState {
+  mytaxiVehicules: MyTaxiVehicleData[];
+}
+class App extends React.Component<{}, AppState> {
+  state: AppState = {
+    mytaxiVehicules: [],
+  };
+
+  async componentDidMount() {
+    const taxyData = await getTaxis();
+    // const car2goData = await get('car2go/vehicles');
+
+    this.setState({ mytaxiVehicules: taxyData });
+    console.log(taxyData);
+    // console.log(car2goData);
+  }
+
   render() {
+    const { mytaxiVehicules } = this.state;
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <div className="app-sidebar">
+          <header className="app-header">
+            <p> List of vehicules </p>
+          </header>
+          <section className="vehicules-list">
+            {mytaxiVehicules.map(vehicule => {
+              return (
+                <div className="card-container" key={vehicule.id}>
+                  <figure>
+                    <img src={mytaxiLogo} alt="logo" width="50" />
+                  </figure>
+                  <p>{`${vehicule.type} - ${vehicule.id}`}</p>
+                  <div className="card-content">
+                    <p>State: {vehicule.state}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        </div>
+        <div className="map-container">
+          <Map vehicules={mytaxiVehicules} />
+        </div>
       </div>
     );
   }
