@@ -1,4 +1,5 @@
 import { get } from '../utils/request';
+import { Vehicule } from '../types/Vehicule';
 
 export interface MyTaxiVehicleData {
   id: number;
@@ -14,13 +15,17 @@ export interface MyTaxiResult {
   poiList: MyTaxiVehicleData[];
 }
 
-async function getTaxis() {
+async function getMytaxiVehicules() {
   const taxis: MyTaxiResult = await get('mytaxi/vehicles');
 
-  return taxis.poiList.map(taxi => ({
-    company: 'mytaxy',
-    ...taxi,
-  }));
+  return taxis.poiList.map(
+    (taxi): Vehicule => ({
+      id: taxi.id,
+      company: 'mytaxi',
+      coordinates: { ...taxi.coordinate },
+      data: taxi,
+    }),
+  );
 }
 
-export { getTaxis };
+export { getMytaxiVehicules };

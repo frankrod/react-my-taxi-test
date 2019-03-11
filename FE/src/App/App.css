@@ -24,6 +24,11 @@ body,
   border: 1px solid rgb(39, 37, 37);
   width: 350px;
   height: 130px;
+  cursor: pointer;
+}
+
+.selected-row {
+  background-color: rgba(88, 88, 88, 0.5)
 }
 
 .vehicules-list {
