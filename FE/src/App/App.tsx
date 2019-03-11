@@ -1,20 +1,19 @@
 import React from 'react';
 import classNames from 'classnames';
 import './App.css';
-import mytaxiLogo from '../images/Mytaxi_logo.png';
+
 import car2goLogo from '../images/Car2go_logo.png';
-import mytaxiMarker from '../images/mytaxi_marker.png';
 import car2goMarker from '../images/car2go_marker.png';
-import { getMytaxiVehicules } from '../services/mytaxi';
 import Map, { MapMarker } from '../components/Map';
 import { getCar2GoVehicules } from '../services/car2go';
 import { Vehicule } from '../types/Vehicule';
+import Mytaxi from '../Mytaxi';
 
 export interface AppState {
   mytaxiVehicules: Vehicule[];
   car2goVehicules: Vehicule[];
   markers: MapMarker[];
-  Allmarkers: MapMarker[];
+  allMarkers: MapMarker[];
   markerSelectedId: number;
   vehiculeFilterBy: string;
 }
@@ -23,12 +22,17 @@ export interface CardVehiculesRefs {
   [key: number]: any;
 }
 
-class App extends React.Component<{}, AppState> {
+export interface AppProps {
+  markers: MapMarker[];
+  allMarkers: MapMarker[];
+}
+
+class App extends React.Component<AppProps, AppState> {
   state: AppState = {
     mytaxiVehicules: [],
     car2goVehicules: [],
-    markers: [],
-    Allmarkers: [],
+    markers: this.props.markers,
+    allMarkers: this.props.allMarkers,
     markerSelectedId: 0,
     vehiculeFilterBy: 'noFilter',
   };
@@ -36,17 +40,7 @@ class App extends React.Component<{}, AppState> {
   cardVehiculesRefs: CardVehiculesRefs = {};
 
   async componentDidMount() {
-    const mytaxiData = await getMytaxiVehicules();
     const car2goData = await getCar2GoVehicules();
-
-    const mytaxiMarkers = mytaxiData.map(
-      ({ id, coordinates, company }): MapMarker => ({
-        id,
-        coordinates,
-        icon: mytaxiMarker,
-        company: company,
-      }),
-    );
 
     const car2goMarkers = car2goData.map(
       ({ id, coordinates, company }): MapMarker => ({
@@ -58,10 +52,7 @@ class App extends React.Component<{}, AppState> {
     );
 
     this.setState({
-      mytaxiVehicules: mytaxiData,
       car2goVehicules: car2goData,
-      markers: [...mytaxiMarkers, ...car2goMarkers],
-      Allmarkers: [...mytaxiMarkers, ...car2goMarkers],
     });
   }
 
@@ -80,13 +71,13 @@ class App extends React.Component<{}, AppState> {
   };
 
   handleVehiculeFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { Allmarkers } = this.state;
+    const { allMarkers } = this.state;
     let markers;
 
     if (e.target.value === 'noFilter') {
-      markers = Allmarkers;
+      markers = allMarkers;
     } else {
-      markers = Allmarkers.filter(marker => marker.company === e.target.value);
+      markers = allMarkers.filter(marker => marker.company === e.target.value);
     }
 
     this.setState({
@@ -94,14 +85,6 @@ class App extends React.Component<{}, AppState> {
       markers,
     });
   };
-
-  showMytaxiVehicules() {
-    const { mytaxiVehicules, vehiculeFilterBy } = this.state;
-    return (
-      mytaxiVehicules.length > 0 &&
-      (vehiculeFilterBy === 'mytaxi' || vehiculeFilterBy === 'noFilter')
-    );
-  }
 
   showCar2goVehicules() {
     const { car2goVehicules, vehiculeFilterBy } = this.state;
@@ -112,13 +95,7 @@ class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    const {
-      mytaxiVehicules,
-      car2goVehicules,
-      markerSelectedId,
-      vehiculeFilterBy,
-      markers,
-    } = this.state;
+    const { car2goVehicules, markerSelectedId, vehiculeFilterBy } = this.state;
     return (
       <div className="App">
         <div className="app-sidebar">
@@ -157,30 +134,12 @@ class App extends React.Component<{}, AppState> {
             </label>
           </header>
           <section className="vehicules-list">
-            {this.showMytaxiVehicules() &&
-              mytaxiVehicules.map(({ data: vehicule }) => {
-                this.cardVehiculesRefs[vehicule.id] = React.createRef<
-                  HTMLElement
-                >();
-                return (
-                  <div
-                    className={classNames('card-container', {
-                      'selected-row': vehicule.id === markerSelectedId,
-                    })}
-                    key={vehicule.id}
-                    ref={this.cardVehiculesRefs[vehicule.id]}
-                    onClick={this.handleCardClicked(vehicule.id)}
-                  >
-                    <figure>
-                      <img src={mytaxiLogo} alt="logo" width="50" />
-                    </figure>
-                    <p>{`${vehicule.type} - ${vehicule.id}`}</p>
-                    <div className="card-content">
-                      <p>State: {vehicule.state}</p>
-                    </div>
-                  </div>
-                );
-              })}
+            <Mytaxi
+              vehiculeFilterBy={vehiculeFilterBy}
+              markerSelectedId={markerSelectedId}
+              cardVehiculesRefs={this.cardVehiculesRefs}
+              handleCardClicked={this.handleCardClicked}
+            />
             {/* Car2go starts here */}
             {this.showCar2goVehicules() &&
               car2goVehicules.map(({ data: vehicule }) => {
@@ -210,7 +169,7 @@ class App extends React.Component<{}, AppState> {
         </div>
         <div className="map-container">
           <Map
-            markers={markers}
+            markers={this.props.markers}
             handleMarkerClicked={this.markerClicked}
             markerSelectedId={markerSelectedId}
           />
