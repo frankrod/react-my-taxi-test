@@ -1,17 +1,12 @@
 import React from 'react';
-import classNames from 'classnames';
+
+import Header from '../components/Header';
+import Map, { MapMarker } from '../components/Map';
+import Mytaxi from '../Mytaxi/Mytaxi.container';
+import Car2go from '../Car2go/Car2go.container';
 import './App.css';
 
-import car2goLogo from '../images/Car2go_logo.png';
-import car2goMarker from '../images/car2go_marker.png';
-import Map, { MapMarker } from '../components/Map';
-import { getCar2GoVehicules } from '../services/car2go';
-import { Vehicule } from '../types/Vehicule';
-import Mytaxi from '../Mytaxi';
-
 export interface AppState {
-  mytaxiVehicules: Vehicule[];
-  car2goVehicules: Vehicule[];
   markers: MapMarker[];
   allMarkers: MapMarker[];
   markerSelectedId: number;
@@ -29,32 +24,24 @@ export interface AppProps {
 
 class App extends React.Component<AppProps, AppState> {
   state: AppState = {
-    mytaxiVehicules: [],
-    car2goVehicules: [],
-    markers: this.props.markers,
-    allMarkers: this.props.allMarkers,
+    markers: [],
+    allMarkers: [],
     markerSelectedId: 0,
     vehiculeFilterBy: 'noFilter',
   };
 
-  cardVehiculesRefs: CardVehiculesRefs = {};
+  static getDerivedStateFromProps(props: AppProps, state: AppState) {
+    if (props.allMarkers !== state.allMarkers) {
+      return {
+        allMarkers: props.allMarkers,
+        markers: props.markers,
+      };
+    }
 
-  async componentDidMount() {
-    const car2goData = await getCar2GoVehicules();
-
-    const car2goMarkers = car2goData.map(
-      ({ id, coordinates, company }): MapMarker => ({
-        id,
-        coordinates,
-        icon: car2goMarker,
-        company: company,
-      }),
-    );
-
-    this.setState({
-      car2goVehicules: car2goData,
-    });
+    return null;
   }
+
+  cardVehiculesRefs: CardVehiculesRefs = {};
 
   markerClicked = (id: number) => (e: React.MouseEvent) => {
     this.setState({ markerSelectedId: id }, () => {
@@ -86,52 +73,16 @@ class App extends React.Component<AppProps, AppState> {
     });
   };
 
-  showCar2goVehicules() {
-    const { car2goVehicules, vehiculeFilterBy } = this.state;
-    return (
-      car2goVehicules.length > 0 &&
-      (vehiculeFilterBy === 'car2go' || vehiculeFilterBy === 'noFilter')
-    );
-  }
-
   render() {
-    const { car2goVehicules, markerSelectedId, vehiculeFilterBy } = this.state;
+    const { markerSelectedId, vehiculeFilterBy, markers } = this.state;
     return (
       <div className="App">
         <div className="app-sidebar">
           <header className="app-header">
-            <p> List of vehicules </p>
-            <label>
-              <input
-                type="radio"
-                name="vehicules-filter"
-                value="noFilter"
-                checked={vehiculeFilterBy === 'noFilter'}
-                onChange={this.handleVehiculeFilter}
-                className="form-check-input"
-              />
-              All
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="vehicules-filter"
-                value="mytaxi"
-                onChange={this.handleVehiculeFilter}
-                className="form-check-input"
-              />
-              Mytaxi
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="vehicules-filter"
-                value="car2go"
-                onChange={this.handleVehiculeFilter}
-                className="form-check-input"
-              />
-              Car2go
-            </label>
+            <Header
+              handleVehiculeFilter={this.handleVehiculeFilter}
+              vehiculeFilterBy={vehiculeFilterBy}
+            />
           </header>
           <section className="vehicules-list">
             <Mytaxi
@@ -140,36 +91,17 @@ class App extends React.Component<AppProps, AppState> {
               cardVehiculesRefs={this.cardVehiculesRefs}
               handleCardClicked={this.handleCardClicked}
             />
-            {/* Car2go starts here */}
-            {this.showCar2goVehicules() &&
-              car2goVehicules.map(({ data: vehicule }) => {
-                this.cardVehiculesRefs[vehicule.id] = React.createRef<
-                  HTMLElement
-                >();
-                return (
-                  <div
-                    className={classNames('card-container', {
-                      'selected-row': vehicule.id === markerSelectedId,
-                    })}
-                    key={vehicule.id}
-                    ref={this.cardVehiculesRefs[vehicule.id]}
-                    onClick={this.handleCardClicked(vehicule.id)}
-                  >
-                    <figure>
-                      <img src={car2goLogo} alt="logo" width="50" />
-                    </figure>
-                    <p>{`${vehicule.name} - ${vehicule.id}`}</p>
-                    <div className="card-content">
-                      <p>State: {vehicule.address}</p>
-                    </div>
-                  </div>
-                );
-              })}
+            <Car2go
+              vehiculeFilterBy={vehiculeFilterBy}
+              markerSelectedId={markerSelectedId}
+              cardVehiculesRefs={this.cardVehiculesRefs}
+              handleCardClicked={this.handleCardClicked}
+            />
           </section>
         </div>
         <div className="map-container">
           <Map
-            markers={this.props.markers}
+            markers={markers}
             handleMarkerClicked={this.markerClicked}
             markerSelectedId={markerSelectedId}
           />
