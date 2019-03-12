@@ -1,3 +1,16 @@
-.card {
+.card-container {
   display: flex;
+  flex-direction: row;
+  border: 1px solid rgb(39, 37, 37);
+  width: 400px;
+  height: 150px;
+  cursor: pointer;
+}
+
+.selected-row {
+  background-color: rgba(88, 88, 88, 0.5)
+}
+
+.logo-fig {
+  align-self: center;
 }

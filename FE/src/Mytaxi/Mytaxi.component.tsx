@@ -2,7 +2,9 @@ import React from 'react';
 import classNames from 'classnames';
 import { Vehicule } from '../types/Vehicule';
 import mytaxiLogo from '../images/Mytaxi_logo.png';
-import { CardVehiculesRefs } from '../App/App';
+import { CardVehiculesRefs } from '../App/App.component';
+import Card from '../components/Card';
+import './Mytaxi.css';
 
 export interface MyTaxiProps {
   getMytaxiVehicules: () => void;
@@ -38,23 +40,31 @@ class Mytaxi extends React.Component<MyTaxiProps> {
         {this.showMytaxiVehicules() &&
           mytaxiVehicules.map(({ data: vehicule }) => {
             cardVehiculesRefs[vehicule.id] = React.createRef<HTMLElement>();
+            const title = `${vehicule.type} - ${vehicule.id}`;
+            const isActive = vehicule.state === 'ACTIVE';
             return (
-              <div
-                className={classNames('card-container', {
-                  'selected-row': vehicule.id === markerSelectedId,
-                })}
+              <Card
                 key={vehicule.id}
-                ref={cardVehiculesRefs[vehicule.id]}
-                onClick={handleCardClicked(vehicule.id)}
+                title={title}
+                vehicule={vehicule}
+                handleCardClicked={handleCardClicked}
+                cardVehiculesRefs={cardVehiculesRefs}
+                logo={mytaxiLogo}
+                markerSelectedId={markerSelectedId}
               >
-                <figure>
-                  <img src={mytaxiLogo} alt="logo" width="50" />
-                </figure>
-                <p>{`${vehicule.type} - ${vehicule.id}`}</p>
-                <div className="card-content">
-                  <p>State: {vehicule.state}</p>
-                </div>
-              </div>
+                <p>
+                  State:{' '}
+                  <span
+                    className={classNames(
+                      'status-text',
+                      { 'status-active': isActive },
+                      { 'status-inactive': !isActive },
+                    )}
+                  >
+                    {vehicule.state}
+                  </span>
+                </p>
+              </Card>
             );
           })}
       </React.Fragment>

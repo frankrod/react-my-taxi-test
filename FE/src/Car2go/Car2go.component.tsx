@@ -1,8 +1,10 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Vehicule } from '../types/Vehicule';
-import { CardVehiculesRefs } from '../App/App';
+import { CardVehiculesRefs } from '../App/App.component';
 import car2goLogo from '../images/Car2go_logo.png';
+import Card from '../components/Card';
+import './Car2go.css';
 
 export interface Car2goProps {
   getCar2goVehicules: () => void;
@@ -20,6 +22,7 @@ class Car2go extends React.Component<Car2goProps> {
 
   showCar2goVehicules() {
     const { car2goVehicules, vehiculeFilterBy } = this.props;
+
     return (
       car2goVehicules.length > 0 &&
       (vehiculeFilterBy === 'car2go' || vehiculeFilterBy === 'noFilter')
@@ -38,23 +41,53 @@ class Car2go extends React.Component<Car2goProps> {
         {this.showCar2goVehicules() &&
           car2goVehicules.map(({ data: vehicule }) => {
             cardVehiculesRefs[vehicule.id] = React.createRef<HTMLElement>();
+            const title = `${vehicule.name} - ${vehicule.id}`;
+            const lowFuel = vehicule.fuel < 40;
             return (
-              <div
-                className={classNames('card-container', {
-                  'selected-row': vehicule.id === markerSelectedId,
-                })}
+              <Card
                 key={vehicule.id}
-                ref={cardVehiculesRefs[vehicule.id]}
-                onClick={handleCardClicked(vehicule.id)}
+                title={title}
+                vehicule={vehicule}
+                handleCardClicked={handleCardClicked}
+                cardVehiculesRefs={cardVehiculesRefs}
+                logo={car2goLogo}
+                markerSelectedId={markerSelectedId}
               >
-                <figure>
-                  <img src={car2goLogo} alt="logo" width="50" />
-                </figure>
-                <p>{`${vehicule.name} - ${vehicule.id}`}</p>
-                <div className="card-content">
-                  <p>State: {vehicule.address}</p>
-                </div>
-              </div>
+                <p>Address: {vehicule.address}</p>
+                <p>
+                  Fuel:{' '}
+                  <span
+                    className={classNames(
+                      'fuel-text',
+                      {
+                        'low-fuel': lowFuel,
+                      },
+                      {
+                        'ok-fuel': !lowFuel,
+                      },
+                    )}
+                  >
+                    {vehicule.fuel}
+                  </span>
+                </p>
+              </Card>
+              // <div
+              //   className={classNames('card-container', {
+              //     'selected-row': vehicule.id === markerSelectedId,
+              //   })}
+              //   key={vehicule.id}
+              //   ref={cardVehiculesRefs[vehicule.id]}
+              //   onClick={handleCardClicked(vehicule.id)}
+              // >
+              //   <figure className="logo-fig">
+              //     <img src={car2goLogo} alt="logo" width="50" />
+              //   </figure>
+              //   <div>
+              //     <p data-testid="card-title-text">{`${vehicule.name} - ${
+              //       vehicule.id
+              //     }`}</p>
+              //   </div>
+              // </div>
             );
           })}
       </React.Fragment>

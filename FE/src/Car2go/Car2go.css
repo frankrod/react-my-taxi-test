@@ -1,0 +1,13 @@
+.fuel-text {
+  padding: 5px;
+  font-weight: bold;
+  color: white;
+}
+
+.ok-fuel {
+  background-color: rgb(46, 139, 87);
+}
+
+.low-fuel {
+  background-color: rgb(220, 20, 60);
+}

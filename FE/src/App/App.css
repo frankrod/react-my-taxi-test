@@ -15,20 +15,7 @@ body,
 .app-sidebar {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
-}
-
-.card-container {
-  display: flex;
-  flex-direction: row;
-  border: 1px solid rgb(39, 37, 37);
-  width: 350px;
-  height: 130px;
-  cursor: pointer;
-}
-
-.selected-row {
-  background-color: rgba(88, 88, 88, 0.5)
+  min-width: 400px;
 }
 
 .vehicules-list {
@@ -38,4 +25,10 @@ body,
 
 .map-container {
   flex: 1 1 auto
+}
+
+.app-header {
+  text-align: center;
+  padding-bottom: 30px;
+  background-color: turquoise;
 }
